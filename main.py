@@ -1603,15 +1603,27 @@ class PhotoManager(App):
             return minpanelsize
 
     def get_application_config(self, **kwargs):
+        env_config_dir = os.environ.get('SNUPM_CONFIG_DIR',None)
+        
         if platform == 'win':
+            if env_config_dir is not None:
+                print('TODO: impl env config dir for windows')
+                exit(1)
             self.data_directory = os.getenv('APPDATA') + os.path.sep + "Snu Photo Manager"
             if not os.path.isdir(self.data_directory):
                 os.makedirs(self.data_directory)
         elif platform == 'linux':
-            self.data_directory = os.path.expanduser('~') + os.path.sep + ".snuphotomanager"
+            if env_config_dir is not None:
+                self.data_directory = env_config_dir
+            else:
+                self.data_directory = os.path.expanduser('~') + os.path.sep + ".snuphotomanager"
+
             if not os.path.isdir(self.data_directory):
                 os.makedirs(self.data_directory)
         elif platform == 'macosx':
+            if env_config_dir is not None:
+                print('TODO: impl env config dir for macosx')
+                exit(1)
             self.data_directory = os.path.expanduser('~') + os.path.sep + ".snuphotomanager"
             if not os.path.isdir(self.data_directory):
                 os.makedirs(self.data_directory)
