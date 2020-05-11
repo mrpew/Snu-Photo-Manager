@@ -2945,7 +2945,7 @@ class AlbumScreen(Screen):
         tag_list.clear_widgets()
         tag_list.add_widget(TagSelectButton(type='Tag', text='favorite', target='favorite', owner=self))
         tag_list.add_widget(ShortLabel())
-        for tag in app.tags:
+        for tag in sorted(app.tags):
             tag_list.add_widget(TagSelectButton(type='Tag', text=tag, target=tag, owner=self))
             tag_list.add_widget(RemoveTagButton(to_remove=tag, owner=self))
 
