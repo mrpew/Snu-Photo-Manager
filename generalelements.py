@@ -652,6 +652,9 @@ Builder.load_string("""
     MenuButton:
         text: 'Modified'
         on_release: root.select(self.text)
+    MenuButton:
+        text: 'Random'
+        on_release: root.select(self.text)
 
 <AlbumExportDropDown>:
     MenuButton:

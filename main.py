@@ -3016,6 +3016,16 @@ class PhotoManager(App):
 
         return "".join(i for i in string if i not in "#%&*{}\\/:?<>+|\"=][;,").lower()
 
+    def test_tag_filter(self, string, *_):
+        """Checks a tag input string, removes non-allowed characters and sets to lower-case.
+            Acts like test_tag, but allows , to seperate tag filters.
+        Arguments:
+            string: String to replace.
+        Returns: A string.
+        """
+
+        return "".join(i for i in string if i not in "#%&*{}\\/:?<>+|\"=][;").lower()
+
     def new_description(self, description_editor, root):
         """Update the description of a folder or album.
         Arguments:

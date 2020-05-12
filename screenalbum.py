@@ -63,6 +63,8 @@ from filebrowser import FileBrowser
 from generalelements import CustomImage, NormalButton, ExpandableButton, ScanningPopup, NormalPopup, ConfirmPopup, NormalLabel, ShortLabel, NormalDropDown, AlbumSortDropDown, MenuButton, TreeViewButton, RemoveButton, WideButton, RecycleItem, PhotoRecycleViewButton, AlbumExportDropDown
 from generalconstants import *
 
+from random import sample
+
 from kivy.lang.builder import Builder
 Builder.load_string("""
 <AlbumScreen>:
@@ -241,7 +243,7 @@ Builder.load_string("""
                                     height: self.minimum_height
                                     NormalLabel:
                                         id: albumLabel
-                                        text:"Current Tags:"
+                                        text:"Current Tags:"                                      
                                     GridLayout:
                                         id: panelDisplayTags
                                         size_hint: 1, None
@@ -264,6 +266,12 @@ Builder.load_string("""
                                     NormalLabel:
                                         id: albumLabel
                                         text:"Add Tags:"
+                                    NormalInput:
+                                        id: searchTags
+                                        multiline: False
+                                        hint_text: 'Filter tags' 
+                                        input_filter: app.test_tag_filter
+                                        on_text: root.filter_tag_list()
                                     GridLayout:
                                         id: panelTags
                                         size_hint: 1, None
@@ -2116,6 +2124,8 @@ class AlbumScreen(Screen):
     crop_right = NumericProperty(0)
     crop_bottom = NumericProperty(0)
     crop_left = NumericProperty(0)
+    #
+    tag_filter = StringProperty('')
 
     def export_screen(self):
         """Switches the app to export mode with the current selected album."""
@@ -2923,6 +2933,14 @@ class AlbumScreen(Screen):
         tag_input.text = ''
         self.update_tags()
 
+    def filter_tag_list(self):
+        """Filters the tag list (tag search)."""
+        app = App.get_running_app()
+        filter_input = self.ids['searchTags']
+        search = filter_input.text
+        self.tag_filter = search
+        self.update_tags()
+
     def update_tags(self):
         """Reads all tags from the current image, and all app tags and refreshes the tag list in the tags panel."""
 
@@ -2945,7 +2963,19 @@ class AlbumScreen(Screen):
         tag_list.clear_widgets()
         tag_list.add_widget(TagSelectButton(type='Tag', text='favorite', target='favorite', owner=self))
         tag_list.add_widget(ShortLabel())
-        for tag in sorted(app.tags):
+
+        filter_keywords = [keyword.strip() for keyword in self.tag_filter.split(',')]
+        if len(filter_keywords) > 0:
+            def _keyword_filter(w):
+                for keyword in filter_keywords:
+                    if keyword in w:
+                        return True
+                return False
+            tmp_tag_list = sorted(list(filter(_keyword_filter, app.tags)))
+        else:
+            tmp_tag_list = app.tags        
+
+        for tag in tmp_tag_list:                
             tag_list.add_widget(TagSelectButton(type='Tag', text=tag, target=tag, owner=self))
             tag_list.add_widget(RemoveTagButton(to_remove=tag, owner=self))
 
@@ -3103,6 +3133,8 @@ class AlbumScreen(Screen):
             sorted_photos = sorted(self.photos, key=lambda x: x[11], reverse=self.sort_reverse)
         elif self.sort_method == 'Name':
             sorted_photos = sorted(self.photos, key=lambda x: os.path.basename(x[0]), reverse=self.sort_reverse)
+        elif self.sort_method == 'Random':
+            sorted_photos = sample(self.photos, len(self.photos))
         else:
             sorted_photos = sorted(self.photos, key=lambda x: x[0], reverse=self.sort_reverse)
         self.photos = sorted_photos
